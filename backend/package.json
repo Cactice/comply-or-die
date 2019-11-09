@@ -1,0 +1,29 @@
+{
+  "name": "comply-or-die",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cactice/comply-or-die.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cactice/comply-or-die/issues"
+  },
+  "homepage": "https://github.com/cactice/comply-or-die#readme",
+  "dependencies": {
+    "express": "^4.15.2",
+    "redis": "^2.8.0",
+    "socket.io": "^2.3.0",
+    "socket.io-client": "^2.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.4"
+  }
+}
