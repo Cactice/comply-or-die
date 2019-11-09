@@ -1,0 +1,15 @@
+
+version: '3'
+services:
+  app:
+    build: .
+    ports: 
+     - "8000:8000"
+    volumes:
+      - "./:/usr/src/app"
+
+  redis:
+    image: "redis:alpine"
+    container_name: redis-container
+    volumes:
+      - "./deployments/redis/data:/data"
