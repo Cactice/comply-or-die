@@ -3,14 +3,10 @@ import React, {LegacyRef, useRef,useState, useEffect }  from "react"
 import { Widget,addResponseMessage } from 'react-chat-widget';
 import { ChatFeed, Message } from 'react-chat-ui'
 import { ButtonGroup, Button, Form, Row, Col, Modal,Container} from 'react-bootstrap';
-
+import {Option} from './video'
 import 'react-chat-widget/lib/styles.css';
 import io from 'socket.io-client';
 
-type Option = {
-  name:string,
-  goTo:string
-}
 const socket = io('http://localhost:8000');
 let map = {
   start:{
@@ -39,12 +35,17 @@ function MyVerticallyCenteredModal(props) {
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <h4>Centered Modal</h4>
+      <ButtonGroup aria-label="Basic example">
+            {props.options.map((option:Option,i) => (
+              <Button onClick={(option)=>{props.guessOption}} key={i} variant="light">{option.name}</Button>
+            ))}
+        </ButtonGroup>
+        {/* <h4>Centered Modal</h4>
         <p>
           Cras mattis consectetur purus sit amet fermentum. Cras justo odio,
           dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac
           consectetur ac, vestibulum at eros.
-        </p>
+        </p> */}
       </Modal.Body>
       <Modal.Footer>
         <Button onClick={props.onHide}>Close</Button>
@@ -69,17 +70,24 @@ const video = () => {
   const [modalShow, setModalShow] = React.useState(false);
   let [nextVideo,setNextVideo] = useState('option1')
   let [currentName,setCurrentName] = useState('start')
-  let [shouldAnswer,setShouldAnswer] = useState(false)
   let sentComment = ''
 
+  let [options,setOptions] = useState([])
   socket.on('chat',
   (msg:string)=>{
     if(msg!=sentComment){
-
       addResponseMessage(msg)
     }
   });
+  socket.on('showOptions',
+  (msg:string)=>{
+    let msgObj:Option[] = JSON.parse(msg)
+    setOptions(msgObj)
+  });
 
+  const guessOption = (option:Option) => {
+    socket.emit('guessOption', option);
+  }
   const newMessage = (message:string) => {
     console.log(`New message incoming! ${message}`);
     sentComment= message
@@ -96,11 +104,24 @@ const video = () => {
 
   return (
     <div>
-
-<MyVerticallyCenteredModal
+      <MyVerticallyCenteredModal
         show={modalShow}
         onHide={() => setModalShow(false)}
+        guessOption={guessOption}
+        options={options}
       />
+        <div style={{
+        position:"absolute" ,width: "100%", height: "100%", left:0, top:0,
+        display: "flex",
+          flexDirection: "column",
+          flexWrap: "nowrap",
+          justifyContent: "center",
+          alignItems: "center",
+        }}>
+          <img src="/blink.gif" style={{maxWidth:'100%',
+    height:'auto'}}></img>
+          <h3>Enjoy The Movie</h3>
+          </div>
         <Widget
         title="Chat"
         handleNewUserMessage={newMessage}
