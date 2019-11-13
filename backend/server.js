@@ -17,27 +17,34 @@ server.on("connection", (socket) => {
     sequenceNumberByClient.set(socket, 1);
     console.info(socket.request.headers.cookie)
     const player_id = socket.id
+    socket.on('start', function(msg){
+      masterMap.set(socket, 1);
+    });
     socket.on('chat', function(msg){
       console.log(msg)
       server.emit('chat',msg)
       serveMaster('chat', msg)
     });
     socket.on('showOptions', function(msg){
-      let msgObj = JSON.parse
+      let msgObj = JSON.parse(msg)
       client.set('answer_'+msgObj.answer,msgObj.answer,redis.print)
       delete msgObj.answer;
 
       server.emit('showOptions', msg);
     });
     socket.on('guessOption', function(msg){
-      serveMaster('guessOption',msg)
+      console.log(msg)
       let msgObj = JSON.parse(msg)
-      client.getAsync('answer_'+msgObj.option).then(function(res) {
-        const answer = res
-        if(msgObj.key==answer){
-          client.incr('points'+player_id,redis.print)
-        }
-      })
+      msgObj.player_id = player_id
+      msg = JSON.stringify(msgObj)
+      serveMaster('guessOption',msg)
+      // let msgObj = JSON.parse(msg)
+      // client.getAsync('answer_'+msgObj.option).then(function(res) {
+      //   const answer = res
+      //   if(msgObj.key==answer){
+      //     client.incr('points'+player_id,redis.print)
+      //   }
+      // })
     });
     socket.on('answerOptions', function(msg){
       server.emit('answerOptions', msg);
