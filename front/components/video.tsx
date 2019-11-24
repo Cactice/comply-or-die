@@ -3,7 +3,7 @@ import React, { LegacyRef, useRef, useState, useEffect } from "react";
 import { ButtonGroup, Button, Row, Col, Container } from "react-bootstrap";
 
 import io from "socket.io-client";
-const socket = io("http://10.129.167.84:8000");
+const socket = io("http://0.0.0.0:8000");
 
 export type Option = {
   id: string;
@@ -47,11 +47,11 @@ let map = {
     ]
   },
   scn_4_Y: {
-    options: [{ name: "Live", goTo: "complied", id: "scn_4_Y@1" }]
+    options: [{ name: "Live", goTo: "complied", id: "scn_4_Y@0" }]
   },
   died: {},
   complied: {
-    options: [{ name: "Live", goTo: "complied", id: "complied@1" }]
+    options: [{ name: "Live", goTo: "complied", id: "complied@0" }]
   },
   start: {
     options: [
@@ -87,24 +87,29 @@ const video = () => {
   const [timeLeft, setTimeLeft] = useState(8);
 
   socket.on("guessOption", (msg: string) => {
-    console.log(msg);
     let { player_id, ...msgObj } = JSON.parse(msg);
     let [question, index]: string[] = msgObj.id.split("@");
     if (poll[question] == null) {
-      let newPoll = poll;
-      newPoll[question] = {};
-      setPoll(newPoll);
+      setPoll(prevPoll => {
+        prevPoll[question] = {};
+        console.log(prevPoll);
+        return prevPoll;
+      });
     }
-    if (!poll[question][player_id]) {
+    if (poll[question][player_id] == null) {
       if (poll[question][index] == null) {
-        let newPoll = poll;
-        newPoll[question][player_id] = true;
-        newPoll[question][index] = 1;
-        setPoll(newPoll);
+        console.log(map);
+        setPoll(prevPoll => {
+          prevPoll[question][player_id] = true;
+          prevPoll[question][index] = 1;
+        return prevPoll;
+        });
       } else {
-        let newPoll = poll;
-        newPoll[question][index] += 1;
-        setPoll(newPoll);
+        console.log(msg);
+        setPoll(prevPoll => {
+          prevPoll[question][index] += 1;
+        return prevPoll;
+        });
       }
     }
   });
@@ -120,7 +125,7 @@ const video = () => {
     // setNextVideo(map[nextVideo].options[0])
     // setCurrentName(nextVideo)
     showOptions(map[currentName].options);
-    let refresh = setTimeout(function() {
+    setTimeout(function() {
       console.log("count");
       let guess;
       let name;
@@ -134,7 +139,6 @@ const video = () => {
       setNextVideo(map[name].options[0]);
       setCurrentName(name);
       answerOption(map[currentName].options[guess]);
-      video.current.play();
     }, 5000);
   };
 
@@ -150,6 +154,7 @@ const video = () => {
         onEnded={playNextVideo}
         width={window.innerWidth}
         height={window.innerHeight}
+        autoPlay
       >
         <source src={`/${currentName}.mp4`} type="video/mp4" />
       </video>
@@ -169,25 +174,27 @@ const video = () => {
         }}
       >
         <ButtonGroup aria-label="Basic example">
-          {map[currentName] != null
-            ? map[currentName].options.map((option, i) => (
-                <Button
-                  onClick={() => {
-                    prepareNext(option);
-                  }}
-                  key={i}
-                  variant="light"
-                >{`${option.name}`}</Button>
-              ))
-            : null}
-          {poll[currentName] != null &&
-            Object.keys(poll[currentName]).forEach((key, index) => (
+          {map[currentName] != null &&
+            map[currentName].options.map((option, i) => (
               <Button
-                key={key}
+                onClick={() => {
+                  prepareNext(option);
+                }}
+                key={i}
                 variant="light"
-              >{`${poll[currentName][index]}`}</Button>
+              >{`${option.name}`}</Button>
             ))}
         </ButtonGroup>
+          {poll[currentName] != null &&
+            Object.keys(poll[currentName]).forEach((key, index) => {
+              if(typeof poll[currentName][key] !== 'number'){return }
+              console.log("jackpot!!", poll[currentName][key]);
+              return (
+                <Button
+                  style={{ color: "white", backgroundColor: "black" }}
+                >Hello {poll[currentName][key]}</Button>
+              );
+            })}
       </div>
       <style jsx>{``}</style>
     </div>
