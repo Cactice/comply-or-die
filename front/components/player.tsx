@@ -2,20 +2,12 @@ import React, { LegacyRef, useRef, useState, useEffect } from "react";
 
 import { Widget, addResponseMessage } from "react-chat-widget";
 import { ChatFeed, Message } from "react-chat-ui";
-import {
-  ButtonGroup,
-  Button,
-  Form,
-  Row,
-  Col,
-  Modal,
-  Container
-} from "react-bootstrap";
+import { ButtonGroup, Button, Modal } from "react-bootstrap";
 import { Option } from "./video";
 import "react-chat-widget/lib/styles.css";
 import io from "socket.io-client";
 
-const socket = io("http://10.129.167.84:8000");
+const socket = io("http://0.0.0.0:8000");
 let map = {
   start: {
     options: [
